@@ -7,8 +7,10 @@ Not a casino platform. Not a USB driver. Not a Rust rewrite of 52 cards.
 ```bash
 make -C c
 PYTHONPATH=. python3 tests/test_table.py
+PYTHONPATH=. python3 tests/test_rank.py
 PYTHONPATH=. python3 scripts/table_prod.py --seats 6 --decks 2
 PYTHONPATH=. python3 scripts/under_table_prod.py
+PYTHONPATH=. python3 scripts/hw_prod.py
 ```
 
 Home: `python scripts/poker_prod.py` in JuniorHome.
@@ -28,22 +30,58 @@ Home: `python scripts/poker_prod.py` in JuniorHome.
 | Bubble | per-seat cloud icon; rub = thumb on RFID or `Table.rub(seat)` |
 | RFID | `Reader.tap(tag, seat)` → rub; `live=False` until hardware |
 | Stakes | `Stakes.post(seat, amt)` stacks + pot + next |
-| Trit | `trit_felt.pack(ids)` Winsor → i2s_hex; optional JuniorLLM handshake |
+| Rank | combo-21 ABC ruling; no 130MB LUT |
+| Trit | `trit_felt.pack(ids)` Winsor → i2s_hex |
 | Bind | 127.0.0.1:18765 profiled, **not listening** |
 | Pi / SFF | aarch64 `.so` same Makefile; `/dev/ttyAMA0` noted, not opened |
-| Rust | rail only; FFI not on shoe length |
 | License | MIT |
+
+---
+
+## BOM and table-part options
+
+Full notes: `hw/BOM.md`. Print: `cad/trough.scad`.
+
+### Structure / fab
+
+| Part | Option A (print) | Option B (buy) | Integrates |
+|------|------------------|----------------|------------|
+| Muck trough | OpenSCAD trough | any rail tray | drop-in |
+| Shoe / gate | print + MG90S later | retail shoe | software deal |
+| Wash / shuffler | C wash on Pi | Shuffle-o-matic / Printables v3 (their license) | `jp_shuffle` still canonical |
+| Sort bins | 4 pockets roadmap | card tray | later |
+| Felt + bubble lids | print bezels | acrylic | peek UI |
+| Under-table | Pi 4/5 4GB+ | Intel/AMD NUC SFF | `under_table.profile` |
+
+### RFID (cards, chips, seats)
+
+Industry tables often tag **chips** for bets; some rooms also tag **cards**. We treat both as *tags* that call `tap`.
+
+| Part | Option | Notes |
+|------|--------|--------|
+| RFID playing cards | 13.56 MHz inlay in poker stock | one UID per card; map UID→cid in a local jsonl |
+| RFID chips | 13.56 MHz tokens | pot/stacks later; not required for peek |
+| Seat antenna | PCB coil under each bubble | which seat rubbed |
+| Board antenna | one coil center | flop/turn/river face-up, no rub |
+| Reader | PN532 / RC522 / ACR122U | operator process; Home does not open USB |
+| Wiring | UART `/dev/ttyAMA0` or USB HID | `open_serial: false` in profile |
+
+Software today: `Reader.tap(tag, seat)` → `rub`. No HID driver in-tree. Do not put SPIFFE on a tag.
+
+### Fasteners / motion (if you build a motor wash)
+
+NEMA17, GT2 20t, MGN9, 6700ZZ, MG90S, N20 — see Shuffle-o-matic BOM; we do not restock their cart.
 
 ---
 
 ## Instructions
 
-1. Clone. `make -C c` (optional; fallback shuffle works).
-2. `PYTHONPATH=. python3 scripts/table_prod.py` — scene JSON, then peek before/after rub seat 0.
-3. Physical table: SFF or Pi under the rail, run the same script on loopback.
-4. RFID later: reader process calls `table.tap(tag, seat)` when a tag hits a seat antenna. Do not open serial from Home automations.
-5. Players must rub (tap) before the seat computer shows ranks. Other seats stay `**`.
-6. Pack the shoe or hole for Home/OSai: `trit_felt.pack(sum(table.hole.values(), []))`.
+1. Clone. `make -C c` (optional).
+2. `PYTHONPATH=. python3 scripts/table_prod.py` — scene, peek before/after rub.
+3. SFF/Pi under the rail, same script, loopback.
+4. RFID later: reader process → `table.tap(tag, seat)`. Not from Home automations.
+5. Rub before ranks. Other seats stay `**`.
+6. Print trough: OpenSCAD → STL. Omega job `terrain-obj`, no UE5.
 
 ---
 
@@ -54,12 +92,10 @@ Home: `python scripts/poker_prod.py` in JuniorHome.
 | Hold'em hole + board | **live** | hole[seat], board[], burns |
 | Multi-deck shoe | **live** | decks 1–8 |
 | Stakes / pot | **live** | stacks, pot, next |
+| 7-card rank + ABC | **live** | combo-21, store `stores/eval_canon.json` |
 | Stud / draw / Omaha | roadmap | same shoe + different hole n |
 | Tournament clock | roadmap | not shipped |
-| Hand evaluator | roadmap | no ranking yet |
 | Networked seats | no | loopback only |
-
-Card encoding: `cid % 52` → rank + suit. Trit pack is a neighbor key, not a hand rank.
 
 ---
 
@@ -67,25 +103,19 @@ Card encoding: `cid % 52` → rank + suit. Trit pack is a neighbor key, not a ha
 
 | Module | Role |
 |--------|------|
-| `c/shuffle.c` | `jp_shuffle(uint16_t*, n, seed)` |
-| `juniorpoker.cards` | shoe + face |
-| `juniorpoker.shuffle` | ctypes or Python |
-| `juniorpoker.table` | deal, rub, peek, scene, tap |
-| `juniorpoker.stakes` | stacks/pot |
-| `juniorpoker.rfid` | tag event, no HID |
-| `juniorpoker.trit_felt` | Winsor pack / optional handshake |
-| `juniorpoker.under_table` | Pi/SFF profile |
-| `scripts/table_prod.py` | CLI scene |
-| `scripts/under_table_prod.py` | profile + pack |
-| `tests/test_table.py` | rub-then-peek + blind other seat |
+| `c/shuffle.c` | `jp_shuffle` |
+| `juniorpoker.table` | deal, rub, peek, tap |
+| `juniorpoker.rank` / `ruling` | five / seven / ABC |
+| `juniorpoker.rfid` | tag event |
+| `juniorpoker.hw` | BOM + profile |
+| `stores/eval_canon.json` | frozen 21 / 7462 facts |
+| `cad/trough.scad` | print |
 
 ---
 
 ## Roadmap
 
-1. Hand evaluator (stdlib), Omaha hole=4.
-2. Operator RFID: serial/HID reader process, still loopback to the table.
-3. Seat UI: local HTML bubbles (no D3 requirement).
-4. OSai golden `poker.json` if JuniorLLM is present.
-5. Rust kernel only if replay n ≥ 1e5.
-6. Never: 0.0.0.0 felt, SPIFFE on a card tag, GGUF pull for shuffle.
+1. UID→cid jsonl when a reader exists.
+2. Omaha hole=4.
+3. Local HTML bubbles.
+4. Never: 0.0.0.0 felt, SPIFFE on a card tag, 130MB LUT pull, vendor STL paste.
