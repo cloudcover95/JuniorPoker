@@ -1,35 +1,30 @@
-"""Felt → Home note. Shuffle stays C. Trit is the receipt, not the RNG."""
+"""Standalone Winsor-style pack of card ids. Optional JuniorLLM handshake."""
 from __future__ import annotations
 
-from juniorpoker.cards import face
-from juniorpoker.table import Table
+
+def pack(ids: list[int]) -> dict:
+    xs = [float(i) for i in ids] or [0.0]
+    a = sorted(abs(x) for x in xs)
+    tau = a[max(0, int(0.95 * (len(a) - 1)))]
+    tau = tau or 1.0
+    clipped = [min(max(x, -tau), tau) for x in xs]
+    g = sum(abs(x) for x in clipped) / len(clipped)
+    g = g or 1.0
+    trits = []
+    for x in clipped:
+        q = round(x / g)
+        trits.append(1 if q > 0 else (-1 if q < 0 else 0))
+    bits = 0
+    for t in trits:
+        bits = (bits << 2) | (t + 1)
+    return {"gamma": round(g, 6), "trits": trits, "i2s_hex": format(bits, "x"), "n": len(trits)}
 
 
-def note(t: Table, seat: int | None = None) -> str:
-    board = "".join(face(c) for c in t.board) or "pre"
-    if seat is None:
-        return f"poker table {t.seats}s {t.decks}d btn{t.button} {board}"
-    return f"poker seat {seat} {board}"
-
-
-def pack(t: Table, seat: int | None = None) -> dict:
-    n = note(t, seat)
-    row = {"note": n, "seats": t.seats, "decks": t.decks, "rfid_hw": t.rfid.live}
+def note_pack(note: str) -> dict:
     try:
         from ports.gaia_proto import handshake
-        from ports.cache_secure import put
 
-        hs = handshake(n, job="dash-viewport")
-        cr = put(n)
-        row.update(
-            {
-                "gamma": (hs.get("note") or {}).get("gamma"),
-                "i2s_hex": (hs.get("note") or {}).get("i2s_hex"),
-                "schema_ok": hs.get("schema_ok"),
-                "collision": cr.get("collision"),
-                "trit": True,
-            }
-        )
-    except ImportError:
-        row["trit"] = False
-    return row
+        env = handshake(note, job="dash-viewport")
+        return {"via": "juniorllm", "i2s_hex": (env.get("note") or {}).get("i2s_hex"), "schema_ok": env.get("schema_ok")}
+    except Exception:
+        return {"via": "felt", **pack([ord(c) for c in (note or "felt")[:32]])}
