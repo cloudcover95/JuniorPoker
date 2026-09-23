@@ -1,11 +1,7 @@
-# Commercial rooms
+# Official rooms vs this table
 
-Would an unofficial seat client get flagged as a bot? **Usually yes.**
-Sites fingerprint extra processes, missing mouse/GPU, shared IP, timing, and ToS-ban "third-party tools." There is no safe "look human" recipe in this repo.
+If the seat **screen** runs the site's own app and the human presses fold/call/raise, that is a console. Same as a USB keypad.
 
-Allowed shapes:
-- Official app/kiosk on a seat screen the human taps
-- A room that publishes an API you implement as an *operator adapter*
-- JuniorPoker `peer` / `party` between your tables
+If software clicks their DOM, fills login, or sizes bets without a press — that is a bot. Rooms fingerprint that (timing, input API, no mouse jitter, shared IP). You get limited or banned. We do not ship injectors, session stealers, or ToS workarounds.
 
-Not built: password vault, site scrape, auto-play into GG/PS/WSOP.
+Login: use their official client. We store no passwords.
