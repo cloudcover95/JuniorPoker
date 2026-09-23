@@ -1,0 +1,9 @@
+stone = true
+license = "MIT"
+stage = "col"
+five_card_hands = 2598960
+seven_card_hands = 133784560
+five_card_classes = 7462
+seven_choose_five = 21
+method = "combo-21"
+pull_130mb = false

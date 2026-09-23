@@ -1,0 +1,22 @@
+{
+  "stone": true,
+  "license": "MIT",
+  "stage": "col",
+  "facts": {
+    "five_card_hands": 2598960,
+    "seven_card_hands": 133784560,
+    "five_card_classes": 7462,
+    "seven_choose_five": 21
+  },
+  "industry": {
+    "cactus_kev": "primes + 7462 classes",
+    "senzee": "perfect hash on kev classes",
+    "twoplustwo": "~130MB LUT, millions of 7-card/s"
+  },
+  "juniorpoker": {
+    "method": "combo-21",
+    "lut_mb": 0,
+    "trit_decides_pot": false
+  },
+  "pull_130mb": false
+}
