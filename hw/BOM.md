@@ -34,19 +34,18 @@ Map UID→cid in local jsonl. Do not encode SPIFFE on the tag.
 
 Home: `open_serial: false`.
 
-## Per-seat action buttons (platform games)
+## Per-seat buttons + scroll wheel
 
-Map to `actions.press(seat, act, amt)` on **this** table. Not a casino bot hid.
+Map to `juniorpoker.hid.action`. `inject: false`.
 
-| Part | Option | Wire |
-|------|--------|------|
-| Fold / check / call / raise / all-in | 5 arcade buttons + 1 encoder for raise amt | GPIO or USB gamepad per seat |
-| Buy | Sanwa/Seimitsu 30 mm or generic arcade | |
-| Print | bezel plate in OpenSCAD later | |
-| USB number pad | cheap; raise digits | |
-| Stream deck / macropad | buy; one per seat | |
+| Part | Buy | Print |
+|------|-----|-------|
+| Fold / check-call / raise | 3 arcade 30 mm | bezel later |
+| Bet wheel | KY-040 encoder or mouse wheel | knob cap |
+| MCU | Pro Micro / Pi Pico as USB HID | — |
+| Macropad | Stream Deck / numpad | — |
 
-If the seat is playing a **commercial** room, put **their official app** on a small screen and let the human tap it. Do not pipe these buttons into an unofficial client.
+If the seat plays a **commercial** room: official app on a small screen; human uses their UI. Do not pipe these buttons into an unofficial client.
 
 ## Collect / wash / sort
 
@@ -83,4 +82,4 @@ NEMA17 ≤40 mm, GT2 20t pulley/idler, MGN9 95/135, 6700ZZ, MG90S, N20 600 rpm. 
 
 ## Software that stays ours
 
-`Table.tap` · `jp_shuffle` · combo-21 ABC · `actions.press` · eval store. Trit does not rank the hand.
+`Table.tap` · `hid.action` · `jp_shuffle` · combo-21 ABC · eval store. Trit does not rank the hand.
