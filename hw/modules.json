@@ -1,0 +1,9 @@
+{
+  "products": [
+    {"id": "trough", "cad": "cad/trough.scad", "omega_job": "terrain-obj"},
+    {"id": "wash", "code": "c/shuffle.c", "gpio": false},
+    {"id": "sff", "bind": "127.0.0.1", "listen": false}
+  ],
+  "ue5_launch": false,
+  "copy_vendor_stl": false
+}

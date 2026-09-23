@@ -1,0 +1,5 @@
+{
+  "who": {"mesh": "cad/trough.scad"},
+  "omega": {"job": "terrain-obj", "launch": false},
+  "download": false
+}
