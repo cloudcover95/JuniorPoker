@@ -1,0 +1,19 @@
+{
+  "store": "juniorpoker-eval-canon",
+  "license": "MIT",
+  "set_in_stone": true,
+  "lut_mb": false,
+  "facts": {
+    "five_card_hands": 2598960,
+    "seven_card_hands": 133784560,
+    "five_card_classes": 7462,
+    "seven_choose_five": 21
+  },
+  "industry": [
+    {"id": "cactus-kev", "kind": "primes+classes"},
+    {"id": "senzee", "kind": "perfect-hash"},
+    {"id": "twoplustwo", "kind": "lut", "mb": 130, "ship": false}
+  ],
+  "ours": "combo-21",
+  "trit_decides_pot": false
+}
