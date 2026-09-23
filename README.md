@@ -119,3 +119,5 @@ NEMA17, GT2 20t, MGN9, 6700ZZ, MG90S, N20 — see Shuffle-o-matic BOM; we do not
 2. Omaha hole=4.
 3. Local HTML bubbles.
 4. Never: 0.0.0.0 felt, SPIFFE on a card tag, 130MB LUT pull, vendor STL paste.
+
+local-first poker holdem rfid raspberry-pi openscad bitnet juniorcloud shuffle mit
