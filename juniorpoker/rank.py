@@ -14,10 +14,12 @@ CAT = (
     "quads",
     "straight-flush",
 )
+# A,2,3,...,K → 12,0,1,...,11
+VAL = (12, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
 
 
 def _r(cid: int) -> int:
-    return cid % 13
+    return VAL[cid % 13]
 
 
 def _s(cid: int) -> int:
@@ -48,12 +50,11 @@ def five(ids: list[int]) -> tuple:
     for r in ranks:
         counts[r] = counts.get(r, 0) + 1
     groups = sorted(((n, r) for r, n in counts.items()), reverse=True)
-    kick = tuple(r for n, r in groups for _ in range(n))
     if flush and st is not None:
         return (8, st)
     if groups[0][0] == 4:
         return (7, groups[0][1], groups[1][1])
-    if groups[0][0] == 3 and groups[1][0] == 2:
+    if groups[0][0] == 3 and len(groups) > 1 and groups[1][0] == 2:
         return (6, groups[0][1], groups[1][1])
     if flush:
         return (5, *sorted(ranks, reverse=True))
@@ -61,7 +62,7 @@ def five(ids: list[int]) -> tuple:
         return (4, st)
     if groups[0][0] == 3:
         return (3, groups[0][1], *sorted((r for n, r in groups[1:]), reverse=True))
-    if groups[0][0] == 2 and groups[1][0] == 2:
+    if groups[0][0] == 2 and len(groups) > 1 and groups[1][0] == 2:
         p = sorted((groups[0][1], groups[1][1]), reverse=True)
         return (2, p[0], p[1], groups[2][1])
     if groups[0][0] == 2:
