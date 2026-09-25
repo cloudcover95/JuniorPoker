@@ -1,0 +1,1 @@
+JuniorPoker — local Hold'em felt. C Fisher–Yates (LCG, not a cert), combo-21 + ABC rank, rub-then-peek bubbles. RFID is tap→rub only (live=False). Trit neighbor needs center/delta; SHA3-256 is the shoe id. Party/peer on 127.0.0.1, no casino client. Not a smart-table, not a shuffler clone. MIT / JuniorCloud.
